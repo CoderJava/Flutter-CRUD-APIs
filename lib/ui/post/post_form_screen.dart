@@ -95,7 +95,7 @@ class _PostFormScreenState extends State<PostFormScreen> {
                                 _isApiCallProcess = false;
                               });
                               if (response.statusCode == 201) {
-                                Navigator.pop(context);
+                                Navigator.of(context).pop(context);
                               } else {
                                 _scaffoldGlobalKey.currentState.showSnackBar(
                                   SnackBar(
@@ -154,24 +154,48 @@ class _PostFormScreenState extends State<PostFormScreen> {
 
   Widget _buildActionAppBarPostForm() {
     if (widget.typeForm == "create") {
-      return null;
+      return Text("");
     } else {
       return GestureDetector(
         onTap: () {
-          setState(() {
-            _isApiCallProcess = true;
-          });
-          deletePost(widget.postDataUpdate.id).then((response) {
-            _isApiCallProcess = false;
-            if (response.statusCode == 200) {
-              Navigator.pop(context);
-            } else {
-              print(response.statusCode);
-              _scaffoldGlobalKey.currentState
-                  .showSnackBar(SnackBar(content: Text("Delete data failed")));
-              setState(() {});
-            }
-          });
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text("Confirmation"),
+                  content: Text("Are you sure want to delete?"),
+                  actions: <Widget>[
+                    FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text("No"),
+                    ),
+                    FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          _isApiCallProcess = true;
+                        });
+                        deletePost(widget.postDataUpdate.id).then((response) {
+                          _isApiCallProcess = false;
+                          if (response.statusCode == 200) {
+                            Navigator.of(
+                                    _scaffoldGlobalKey.currentState.context)
+                                .pop();
+                          } else {
+                            print(response.statusCode);
+                            _scaffoldGlobalKey.currentState.showSnackBar(
+                                SnackBar(content: Text("Delete data failed")));
+                            setState(() {});
+                          }
+                        });
+                      },
+                      child: Text("Yes"),
+                    ),
+                  ],
+                );
+              });
         },
         child: Padding(
           padding: const EdgeInsets.only(right: 16.0),
