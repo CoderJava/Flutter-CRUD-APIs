@@ -7,20 +7,18 @@ class PostData {
 
   PostData({this.id, this.title, this.author});
 
+  @override
+  String toString() {
+    return 'PostData{id: $id, title: $title, author: $author}';
+  }
+
   factory PostData.fromJson(Map<String, dynamic> json) {
     return PostData(
-      id: json["id"],
-      title: json["title"],
-      author: json["author"]
-    );
+        id: json["id"], title: json["title"], author: json["author"]);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      "id": id,
-      "title": title,
-      "author": author
-    };
+    return {"id": id, "title": title, "author": author};
   }
 }
 

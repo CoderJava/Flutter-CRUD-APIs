@@ -1,4 +1,4 @@
-import 'dart:_http';
+import 'dart:io';
 
 import 'package:flutter_crud_apis/domain/post/PostData.dart';
 import 'package:http/http.dart' as http;
@@ -16,5 +16,10 @@ Future<http.Response> createPost(PostData postData) async {
     headers: {HttpHeaders.contentTypeHeader: "application/json"},
     body: postDataToJson(postData),
   );
+  return response;
+}
+
+Future<http.Response> deletePost(int id) async {
+  final response = await http.delete("$url/posts/$id");
   return response;
 }

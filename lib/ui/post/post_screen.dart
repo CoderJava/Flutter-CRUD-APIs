@@ -62,7 +62,7 @@ class _PostScreenState extends State<PostScreen> {
             context,
             MaterialPageRoute(
               builder: (context) {
-                return PostFormScreen(typeForm: "create");
+                return PostFormScreen("create");
               },
             ),
           );
@@ -80,7 +80,9 @@ class _PostScreenState extends State<PostScreen> {
           child: Card(
             child: InkWell(
               onTap: () {
-                // TODO: do something in here
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return PostFormScreen("update", postData: postData);
+                }));
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -7,9 +7,14 @@ final _titleFieldGlobalKey = GlobalKey<_TitleTextFieldWidgetState>();
 final _authorFieldGlobalKey = GlobalKey<_AuthorTextFieldWidgetState>();
 
 class PostFormScreen extends StatefulWidget {
-  final String typeForm;
+  String typeForm;
+  PostData postDataUpdate;
 
-  PostFormScreen({@required this.typeForm});
+  PostFormScreen(String typeForm, {PostData postData}) {
+    this.typeForm = typeForm;
+    this.postDataUpdate =
+        postData == null ? PostData(title: "", author: "") : postData;
+  }
 
   @override
   _PostFormScreenState createState() => _PostFormScreenState();
@@ -27,8 +32,8 @@ class _PostFormScreenState extends State<PostFormScreen> {
     return Scaffold(
       key: _scaffoldGlobalKey,
       appBar: AppBar(
-        title: Text(
-            widget.typeForm == "create" ? "Post Create" : "Post Update/Delete"),
+        title: Text(widget.typeForm == "create" ? "Post Create" : "Post Edit"),
+        actions: <Widget>[_buildActionAppBarPostForm()],
       ),
       body: Stack(
         children: _buildBodyWidget(paddingBottomScreen),
@@ -39,6 +44,7 @@ class _PostFormScreenState extends State<PostFormScreen> {
   List<Widget> _buildBodyWidget(double paddingBottomScreen) {
     Form form = Form(
       child: PostInheritedWidget(
+        "Make sure you fill this field",
         child: SafeArea(
           child: Padding(
             padding: EdgeInsets.only(
@@ -50,8 +56,12 @@ class _PostFormScreenState extends State<PostFormScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                TitleTextFieldWidget(key: _titleFieldGlobalKey),
-                AuthorTextFieldWidget(key: _authorFieldGlobalKey),
+                TitleTextFieldWidget(
+                    key: _titleFieldGlobalKey,
+                    title: widget.postDataUpdate.title),
+                AuthorTextFieldWidget(
+                    key: _authorFieldGlobalKey,
+                    author: widget.postDataUpdate.author),
                 Padding(
                   padding: const EdgeInsets.only(top: 12.0),
                   child: Row(
@@ -67,6 +77,12 @@ class _PostFormScreenState extends State<PostFormScreen> {
                                 .currentState.authorTextEditingController.text
                                 .trim();
                             if (title.isEmpty || author.isEmpty) {
+                              _scaffoldGlobalKey.currentState.showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                      "Please make sure you fill all field"),
+                                ),
+                              );
                               return;
                             }
 
@@ -81,8 +97,11 @@ class _PostFormScreenState extends State<PostFormScreen> {
                               if (response.statusCode == 201) {
                                 Navigator.pop(context);
                               } else {
-                                _scaffoldGlobalKey.currentState.showSnackBar(SnackBar(
-                                    content: Text("Create data failed")));
+                                _scaffoldGlobalKey.currentState.showSnackBar(
+                                  SnackBar(
+                                    content: Text("Create data failed"),
+                                  ),
+                                );
                               }
                             });
                           },
@@ -132,12 +151,42 @@ class _PostFormScreenState extends State<PostFormScreen> {
     }
     return listWidget;
   }
+
+  Widget _buildActionAppBarPostForm() {
+    if (widget.typeForm == "create") {
+      return null;
+    } else {
+      return GestureDetector(
+        onTap: () {
+          setState(() {
+            _isApiCallProcess = true;
+          });
+          deletePost(widget.postDataUpdate.id).then((response) {
+            _isApiCallProcess = false;
+            if (response.statusCode == 200) {
+              Navigator.pop(context);
+            } else {
+              print(response.statusCode);
+              _scaffoldGlobalKey.currentState
+                  .showSnackBar(SnackBar(content: Text("Delete data failed")));
+              setState(() {});
+            }
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: Icon(Icons.delete),
+        ),
+      );
+    }
+  }
 }
 
 class PostInheritedWidget extends InheritedWidget {
-  final errorMessage = "Make sure you fill this field";
+  final errorMessage;
 
-  const PostInheritedWidget({
+  const PostInheritedWidget(
+    this.errorMessage, {
     Key key,
     @required Widget child,
   })  : assert(child != null),
@@ -155,7 +204,9 @@ class PostInheritedWidget extends InheritedWidget {
 }
 
 class TitleTextFieldWidget extends StatefulWidget {
-  TitleTextFieldWidget({Key key}) : super(key: key);
+  String title = "";
+
+  TitleTextFieldWidget({Key key, this.title}) : super(key: key);
 
   @override
   _TitleTextFieldWidgetState createState() => _TitleTextFieldWidgetState();
@@ -185,6 +236,7 @@ class _TitleTextFieldWidgetState extends State<TitleTextFieldWidget> {
   @override
   void initState() {
     super.initState();
+    _titleTextEditingController.text = widget.title;
     _titleTextEditingController.addListener(() {
       setState(() {
         _isFieldTitleValid = _titleTextEditingController.text.trim().isNotEmpty;
@@ -200,7 +252,9 @@ class _TitleTextFieldWidgetState extends State<TitleTextFieldWidget> {
 }
 
 class AuthorTextFieldWidget extends StatefulWidget {
-  AuthorTextFieldWidget({Key key}) : super(key: key);
+  String author = "";
+
+  AuthorTextFieldWidget({Key key, this.author}) : super(key: key);
 
   @override
   _AuthorTextFieldWidgetState createState() => _AuthorTextFieldWidgetState();
@@ -231,6 +285,7 @@ class _AuthorTextFieldWidgetState extends State<AuthorTextFieldWidget> {
   @override
   void initState() {
     super.initState();
+    _authorTextEditingController.text = widget.author;
     _authorTextEditingController.addListener(() {
       setState(() {
         _isFieldAuthorValid =
