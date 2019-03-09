@@ -62,7 +62,7 @@ class _PostScreenState extends State<PostScreen> {
             context,
             MaterialPageRoute(
               builder: (context) {
-                return PostFormScreen("create");
+                return PostFormScreen("create", PostData(title: "", author: ""));
               },
             ),
           );
@@ -81,7 +81,7 @@ class _PostScreenState extends State<PostScreen> {
             child: InkWell(
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return PostFormScreen("update", postData: postData);
+                  return PostFormScreen("update", postData);
                 }));
               },
               child: Column(

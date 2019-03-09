@@ -7,14 +7,10 @@ final _titleFieldGlobalKey = GlobalKey<_TitleTextFieldWidgetState>();
 final _authorFieldGlobalKey = GlobalKey<_AuthorTextFieldWidgetState>();
 
 class PostFormScreen extends StatefulWidget {
-  String typeForm;
-  PostData postDataUpdate;
+  final String typeForm;
+  final PostData postDataUpdate;
 
-  PostFormScreen(String typeForm, {PostData postData}) {
-    this.typeForm = typeForm;
-    this.postDataUpdate =
-        postData == null ? PostData(title: "", author: "") : postData;
-  }
+  PostFormScreen(this.typeForm, this.postDataUpdate);
 
   @override
   _PostFormScreenState createState() => _PostFormScreenState();
@@ -89,24 +85,45 @@ class _PostFormScreenState extends State<PostFormScreen> {
                             setState(() {
                               _isApiCallProcess = true;
                             });
-                            createPost(PostData(title: title, author: author))
-                                .then((response) {
-                              setState(() {
-                                _isApiCallProcess = false;
+                            if (widget.typeForm == "create") {
+                              createPost(PostData(title: title, author: author))
+                                  .then((response) {
+                                setState(() {
+                                  _isApiCallProcess = false;
+                                });
+                                if (response.statusCode == 201) {
+                                  Navigator.of(context).pop();
+                                } else {
+                                  _scaffoldGlobalKey.currentState.showSnackBar(
+                                    SnackBar(
+                                      content: Text("Create data failed"),
+                                    ),
+                                  );
+                                }
                               });
-                              if (response.statusCode == 201) {
-                                Navigator.of(context).pop(context);
-                              } else {
-                                _scaffoldGlobalKey.currentState.showSnackBar(
-                                  SnackBar(
-                                    content: Text("Create data failed"),
-                                  ),
-                                );
-                              }
-                            });
+                            } else {
+                              updatePost(
+                                PostData(
+                                    id: widget.postDataUpdate.id,
+                                    title: title,
+                                    author: author),
+                              ).then((response) {
+                                if (response.statusCode == 200) {
+                                  Navigator.of(context).pop();
+                                } else {
+                                  _scaffoldGlobalKey.currentState.showSnackBar(
+                                    SnackBar(
+                                      content: Text("Update data failed"),
+                                    ),
+                                  );
+                                }
+                              });
+                            }
                           },
                           child: Text(
-                            "Create Data".toUpperCase(),
+                            widget.typeForm == "create"
+                                ? "Create Data".toUpperCase()
+                                : "Update Change".toUpperCase(),
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -228,9 +245,9 @@ class PostInheritedWidget extends InheritedWidget {
 }
 
 class TitleTextFieldWidget extends StatefulWidget {
-  String title = "";
+  final String title;
 
-  TitleTextFieldWidget({Key key, this.title}) : super(key: key);
+  TitleTextFieldWidget({Key key, this.title = ""}) : super(key: key);
 
   @override
   _TitleTextFieldWidgetState createState() => _TitleTextFieldWidgetState();
@@ -276,9 +293,9 @@ class _TitleTextFieldWidgetState extends State<TitleTextFieldWidget> {
 }
 
 class AuthorTextFieldWidget extends StatefulWidget {
-  String author = "";
+  final String author;
 
-  AuthorTextFieldWidget({Key key, this.author}) : super(key: key);
+  AuthorTextFieldWidget({Key key, this.author = ""}) : super(key: key);
 
   @override
   _AuthorTextFieldWidgetState createState() => _AuthorTextFieldWidgetState();
