@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_crud_apis/Post.dart';
-import 'package:flutter_crud_apis/services.dart';
+import 'package:flutter_crud_apis/profile_screen.dart';
+import 'package:flutter_crud_apis/comment_screen.dart';
+import 'package:flutter_crud_apis/ui/post/post_screen.dart';
 
 void main() => runApp(MaterialApp(
       title: "Flutter CRUD APIs",
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      routes: {
+        "/posts": (context) {
+          return PostScreen();
+        },
+        "/comments": (context) {
+          return CommentScreen();
+        },
+        "/profile": (context) {
+          return ProfileScreen();
+        }
+      },
       home: MainApp(),
     ));
 
@@ -34,19 +46,19 @@ class MainApp extends StatelessWidget {
               ),
               RaisedButton(
                 onPressed: () {
-                  // TODO: do something in here
+                  Navigator.pushNamed(context, "/posts");
                 },
                 child: Text("Posts"),
               ),
               RaisedButton(
                 onPressed: () {
-                  // TODO: do something in here
+                  Navigator.pushNamed(context, "/comments");
                 },
                 child: Text("Comments"),
               ),
               RaisedButton(
                 onPressed: () {
-                  // TODO: do something in here
+                  Navigator.pushNamed(context, "/profile");
                 },
                 child: Text("Profile"),
               ),
